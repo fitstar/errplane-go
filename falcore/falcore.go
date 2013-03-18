@@ -1,10 +1,10 @@
 package errplane_falcore
 
 import (
+	"fmt"
 	"github.com/fitstar/errplane-go"
 	"github.com/ngmoco/falcore"
 	"net/http"
-	"fmt"
 )
 
 // Write the timings of a falcore request to errplane
