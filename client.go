@@ -10,6 +10,7 @@ import (
 )
 
 var retries = 5
+var sharedClient *Client
 
 type Client struct {
 	ApplicationId string
@@ -19,6 +20,16 @@ type Client struct {
 	queue         chan []byte
 	dropCount     int
 	ticker        *time.Ticker
+}
+
+// Init singleton
+func Setup(app_id, environment, key string) {
+	sharedClient = NewClient(app_id, environment, key)
+}
+
+// Enqueue event using singleton client
+func EnqueueEvent(e *Event) {
+	sharedClient.EnqueueEvent(e)
 }
 
 func NewClient(app_id, environment, key string) *Client {
