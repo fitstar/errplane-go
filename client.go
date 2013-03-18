@@ -32,6 +32,15 @@ func EnqueueEvent(e *Event) {
 	sharedClient.EnqueueEvent(e)
 }
 
+// Helper for quick tracking
+func TrackEvent(name string, value float64, context interface{}) {
+	sharedClient.EnqueueEvent(&Event{
+		Name:    name,
+		Value:   value,
+		Context: context,
+	})
+}
+
 func NewClient(app_id, environment, key string) *Client {
 	c := &Client{
 		ApplicationId: app_id,
