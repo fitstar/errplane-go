@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var retries = 5
+var retries = 1 // Don't do this for now
 var sharedClient *Client
 
 type Client struct {
@@ -20,6 +20,7 @@ type Client struct {
 	queue         chan []byte
 	dropCount     int
 	ticker        *time.Ticker
+	throttle      *time.Ticker
 }
 
 // Init singleton
@@ -53,6 +54,7 @@ func NewClient(app_id, environment, key string) *Client {
 		client:        new(http.Client),
 		queue:         make(chan []byte, 1024),
 		ticker:        time.NewTicker(60 * time.Second),
+		throttle:      time.NewTicker(50 * time.Millisecond),
 	}
 	// FIXME: do we need a Close() method to shut this down?
 	go c.sender()
@@ -73,6 +75,7 @@ func (c *Client) EnqueueEvent(e *Event) {
 }
 
 func (c *Client) Post(data []byte) error {
+	<- c.throttle.C // don't send more often than the throttle will allow
 	res, err := c.client.Post(c.url(), "application/octet-stream", bytes.NewBuffer(data))
 	if err == nil && res != nil && res.StatusCode/100 != 2 {
 		err = errors.New(fmt.Sprintf("errplane: send error %v", res.Status))
