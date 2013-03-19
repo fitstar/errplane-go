@@ -16,12 +16,6 @@ type Event struct {
 
 func (e *Event) Line() []byte {
 
-	// Default value: 1
-	v := e.Value
-	if v == 0 {
-		v = 1
-	}
-
 	// Default timestamp == 'now'
 	ts := ""
 	if e.Timestamp != nil {
@@ -40,7 +34,7 @@ func (e *Event) Line() []byte {
 		}
 	}
 
-	line := fmt.Sprintf("%v %v %v", e.Name, v, ts)
+	line := fmt.Sprintf("%v %v %v", e.Name, e.Value, ts)
 	if ctx != "" {
 		line = fmt.Sprintf("%s %s", line, ctx)
 	}
