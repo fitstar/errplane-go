@@ -3,7 +3,7 @@ package errplane_falcore
 import (
 	"fmt"
 	"github.com/fitstar/errplane-go"
-	"github.com/ngmoco/falcore"
+	"github.com/fitstar/falcore"
 	"net/http"
 )
 
