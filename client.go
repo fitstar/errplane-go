@@ -111,11 +111,13 @@ func (c *Client) tick() {
 		drops := c.dropCount
 		c.dropCount -= drops
 
-		e := new(Event)
-		e.Name = "meta/errplane_dropped_events"
-		e.Value = float64(drops)
+		if drops > 0 {
+			e := new(Event)
+			e.Name = "meta/errplane_dropped_events"
+			e.Value = float64(drops)
 
-		c.send(e.Line())
+			c.send(e.Line())
+		}
 	}
 }
 
