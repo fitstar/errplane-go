@@ -19,7 +19,7 @@ func NewTracer(ep *errplane.Client) *Tracer {
 func (t *Tracer) Trace(req *falcore.Request, res *http.Response) {
 	e := new(errplane.Event)
 	e.Name = fmt.Sprintf("controllers/%v", req.Signature())
-	e.Value = float64(falcore.TimeDiff(req.StartTime, req.EndTime))
+	e.Value = float64(req.EndTime.Sub(req.StartTime)) / float64(time.Milisecond)
 	if t.ep != nil {
 		t.ep.EnqueueEvent(e)
 	} else {
