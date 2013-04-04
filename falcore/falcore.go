@@ -40,7 +40,7 @@ func (t *Tracer) Trace(req *falcore.Request, res *http.Response) {
 	e.Context = context
 
 	if lastStage != nil {
-		e.Name = fmt.Sprintf("controllers/%v/%v", lastStage.Name, req.Signature())
+		e.Name = fmt.Sprintf("controllers/%v#%v", lastStage.Name, req.Signature())
 	} else {
 		e.Name = fmt.Sprintf("controllers/%v", req.Signature())
 	}
