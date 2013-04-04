@@ -23,18 +23,27 @@ type traceContextJSON struct {
 
 func (t *Tracer) Trace(req *falcore.Request, res *http.Response) {
 	e := new(errplane.Event)
-	e.Name = fmt.Sprintf("controllers/%v", req.Signature())
 	e.Value = float64(req.EndTime.Sub(req.StartTime)) / float64(time.Millisecond)
 
+	var lastStage *falcore.PipelineStageStat
 	var context = new(traceContextJSON)
 	context.Stages = make([]string, req.PipelineStageStats.Len())
 	i := 0
 	for e := req.PipelineStageStats.Front(); e != nil; e = e.Next() {
 		pss, _ := e.Value.(*falcore.PipelineStageStat)
 		context.Stages[i] = fmt.Sprintf("%v:%v", pss.Name, pss.Status)
+		if lastStage.Type == falcore.PipelineStageTypeUpstream {
+			lastStage = pss
+		}
 		i++
 	}
 	e.Context = context
+
+	if lastStage != nil {
+		e.Name = fmt.Sprintf("controllers/%v/%v", lastStage.Name, req.Signature())
+	} else {
+		e.Name = fmt.Sprintf("controllers/%v", req.Signature())
+	}
 	
 	if t.ep != nil {
 		t.ep.EnqueueEvent(e)
