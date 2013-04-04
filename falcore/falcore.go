@@ -32,7 +32,7 @@ func (t *Tracer) Trace(req *falcore.Request, res *http.Response) {
 	for e := req.PipelineStageStats.Front(); e != nil; e = e.Next() {
 		pss, _ := e.Value.(*falcore.PipelineStageStat)
 		context.Stages[i] = fmt.Sprintf("%v:%v", pss.Name, pss.Status)
-		if lastStage.Type == falcore.PipelineStageTypeUpstream {
+		if lastStage == nil || lastStage.Type == falcore.PipelineStageTypeUpstream {
 			lastStage = pss
 		}
 		i++
