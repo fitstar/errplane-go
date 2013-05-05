@@ -44,7 +44,7 @@ func (t *Tracer) Trace(req *falcore.Request, res *http.Response) {
 	} else {
 		e.Name = fmt.Sprintf("controllers/%v", req.Signature())
 	}
-	
+
 	if t.ep != nil {
 		t.ep.EnqueueEvent(e)
 	} else {
