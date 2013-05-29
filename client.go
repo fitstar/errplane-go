@@ -77,7 +77,7 @@ func (c *Client) EnqueueEvent(e *Event) {
 func (c *Client) Post(data []byte) error {
 	<-c.throttle.C // don't send more often than the throttle will allow
 	res, err := c.client.Post(c.url(), "application/octet-stream", bytes.NewBuffer(data))
-	if res.Body != nil {
+	if res != nil && res.Body != nil {
 		defer res.Body.Close()
 	}
 	if err == nil && res != nil && res.StatusCode/100 != 2 {
