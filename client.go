@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"sync/atomic"
 	"time"
 )
 
@@ -18,7 +19,7 @@ type Client struct {
 	APIKey        string
 	client        *http.Client
 	queue         chan []byte
-	dropCount     int
+	dropCount     int64
 	ticker        *time.Ticker
 	throttle      *time.Ticker
 }
@@ -66,7 +67,7 @@ func (c *Client) Enqueue(data []byte) {
 	select {
 	case c.queue <- data:
 	default:
-		c.dropCount++
+		atomic.AddInt64(&c.dropCount, 1)
 	}
 }
 
@@ -77,7 +78,7 @@ func (c *Client) EnqueueEvent(e *Event) {
 func (c *Client) Post(data []byte) error {
 	<-c.throttle.C // don't send more often than the throttle will allow
 	res, err := c.client.Post(c.url(), "application/octet-stream", bytes.NewBuffer(data))
-	if res.Body != nil {
+	if res != nil && res.Body != nil {
 		defer res.Body.Close()
 	}
 	if err == nil && res != nil && res.StatusCode/100 != 2 {
@@ -89,7 +90,7 @@ func (c *Client) Post(data []byte) error {
 func (c *Client) sender() {
 	for data := range c.queue {
 		if sent := c.send(data); !sent {
-			c.dropCount++
+			atomic.AddInt64(&c.dropCount, 1)
 		}
 	}
 }
@@ -108,8 +109,8 @@ func (c *Client) send(data []byte) bool {
 func (c *Client) tick() {
 	for _ = range c.ticker.C {
 		// Track dropped events
-		drops := c.dropCount
-		c.dropCount -= drops
+		drops := atomic.LoadInt64(&c.dropCount)
+		atomic.StoreInt64(&c.dropCount, -drops)
 
 		if drops > 0 {
 			e := new(Event)
