@@ -25,8 +25,9 @@ type Client struct {
 }
 
 // Init singleton
-func Setup(app_id, environment, key string) {
+func Setup(app_id, environment, key string)*Client {
 	sharedClient = NewClient(app_id, environment, key)
+	return sharedClient
 }
 
 // Enqueue event using singleton client
